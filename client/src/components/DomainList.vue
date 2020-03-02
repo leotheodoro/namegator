@@ -29,6 +29,9 @@
                         <a v-bind:href="domain.checkout" target="_blank" class="btn btn-success">
                           <span class="fa fa-shopping-cart"></span>
                         </a>
+                        <button class="btn btn-info ml-2" @click="openDomain(domain.name)">
+                          <span class="fa fa-search"></span>
+                        </button>
                       </div>
                     </div>
                   </li>
@@ -148,6 +151,11 @@ export default {
       }).then(res => {
         const query = res.data;
         this.domains = query.data.domains;
+      });
+    },
+    openDomain(domain) {
+      this.$router.push({
+        path: `/domains/${domain}`
       });
     }
   },
