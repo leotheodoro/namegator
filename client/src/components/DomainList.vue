@@ -19,10 +19,13 @@
                 <ul class="list-group">
                   <li class="list-group-item" v-for="domain in domains" :key="domain.name">
                     <div class="row">
-                      <div class="col-md">
+                      <div class="col-md-6">
                         {{domain.name}}
                       </div>
-                      <div class="col-md text-right">
+                      <div class="col-md-3">
+                        <span class="badge" v-bind:class="[domain.available ? 'badge-primary' : 'badge-danger']">{{(domain.available ? 'Disponível' : 'Não Disponível')}}</span>
+                      </div>
+                      <div class="col-md-3 text-right">
                         <a v-bind:href="domain.checkout" target="_blank" class="btn btn-success">
                           <span class="fa fa-shopping-cart"></span>
                         </a>
@@ -55,7 +58,8 @@ export default {
       items: {
         prefix: [],
         suffix: [],
-      }
+      },
+      domains: [],
     }
   },
   methods: {
@@ -81,6 +85,7 @@ export default {
         const query = res.data;
         const newItem = query.data.newItem;
         this.items[newItem.type].push(newItem);
+        this.generateDomains();
       });
     },
     deleteItem(item) {
@@ -98,11 +103,12 @@ export default {
           }
         }
       }).then(() => {
-        this.getItems(item.type);
+        this.items[item.type].splice(this.items[item.type].indexOf(item), 1);
+        this.generateDomains();
       })
     },
     getItems(type) {
-      axios({
+      return axios({
         url: 'http://localhost:4000',
         method: 'POST',
         data: {
@@ -124,28 +130,34 @@ export default {
         this.items[type] = query.data.items;
       });
     },
-  },
-  computed: {
-    domains() {
-      const domains = [];
-      for(const prefix of this.items.prefix) {
-        for(const suffix of this.items.suffix) {
-          const name = prefix.description + suffix.description;
-          const url = name.toLowerCase();
-          const checkout = `https://registro.br/busca-dominio?fqdn=${url}`;
-          domains.push({
-            name,
-            checkout
-          });
+    generateDomains() {
+      axios({
+        url: 'http://localhost:4000',
+        method: 'POST',
+        data: {
+          query: `
+            mutation {
+              domains: generateDomains {
+                name
+                checkout
+                available
+              }
+            }
+          `
         }
-      }
-
-      return domains;
+      }).then(res => {
+        const query = res.data;
+        this.domains = query.data.domains;
+      });
     }
   },
   created() {
-    this.getItems("prefix");
-    this.getItems("suffix");
+    Promise.all([
+      this.getItems("prefix"),
+      this.getItems("suffix")
+    ]).then(() => {
+      this.generateDomains();
+    });
   }
 }
 </script>
