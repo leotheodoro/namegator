@@ -7,7 +7,7 @@
             <AppItemList :items="items.prefix" type="prefix" title="Prefixos" v-on:addItem="addItem" v-on:deleteItem="deleteItem"/>
           </div>
           <div class="col-md-6">
-            <AppItemList :items="items.suffix" type="suffix" title="suffixos" v-on:addItem="addItem" v-on:deleteItem="deleteItem"/>
+            <AppItemList :items="items.suffix" type="suffix" title="Sufixos" v-on:addItem="addItem" v-on:deleteItem="deleteItem"/>
           </div>
         </div>
         <br/>
